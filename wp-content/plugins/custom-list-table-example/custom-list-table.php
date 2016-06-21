@@ -59,11 +59,11 @@ class Enquiry_List_Table extends WP_List_Table {
 			case 'status':
 			
 				$status_array = array('Awaiting','Responded','Confirmed','Completed');
-				
-				$rendered_column .= '<select style="width:100%" class="status">';
+		
+				$rendered_column .= '<select style="width:100%" class="status" id="' . $item["id"] . '">';
 			
 				foreach ( $status_array as $key => $value ) {
-					
+
 					$optionSelectedHtml = '';
 					
 					if ( $item['status'] == $key ) {
@@ -109,11 +109,13 @@ class Enquiry_List_Table extends WP_List_Table {
     }
 
     function column_cb($item){
+
         return sprintf(
             '<input type="checkbox" name="%1$s[]" value="%2$s" />',
             /*$1%s*/ $this->_args['singular'],  //Let's simply repurpose the table's singular label ("movie")
             /*$2%s*/ $item['ID']                //The value of the checkbox should be the record's id
         );
+
     }
 
     function get_columns() {
@@ -135,23 +137,19 @@ class Enquiry_List_Table extends WP_List_Table {
 			'status'			=> 'Status'
             
 		);
+
 	}
 
     function get_sortable_columns() {
 
 		return $sortable_columns = array(
             
-			'name'	 	=> array( 'name', false ),	//true means it's already sorted
-            
+			'name'	 	    => array( 'name', false ),	//true means it's already sorted
 			'start_date'	=> array( 'start_date', false ),
-            
 			'launch_date'	=> array( 'launch_date', false ),
-            
-			'id'	 	=> array( 'id', false ),	//true means it's already sorted
-            
+			'id'	 	    => array( 'id', false ),	//true means it's already sorted
 			'project_type'	=> array( 'project_type', false ),
-            
-			'status'	=> array( 'status', false )
+			'status'	    => array( 'status', false )
 		);
 	}
 
@@ -275,24 +273,23 @@ function tt_render_list_page(){
 
             var enquiryStatusValue = jQuery(this).val();
 
+            var ajaxData = {
+                    'action': 'updateDatabase',
+                    'currentId': jQuery(this).attr('id'),
+                    'data': enquiryStatusValue
+            }
+
             jQuery.ajax({
 
                 type: "POST",
-
                 url: "/wp-admin/admin-ajax.php",
-
-                data: enquiryStatusValue,
-
+                data: ajaxData,
                 success: function() {
-
                     alert("SUCCESSFUL!");
-
                 },
-
-                error: function() {
-
+                error: function(err) {
                     alert("FAILED!!");
-
+                    console.log(err);
                 }
                 
             });
@@ -302,8 +299,28 @@ function tt_render_list_page(){
     </script>
 
 	<?php
-	
+
 }
 
+    // PHP Receiver
+
+wp_enqueue_script('jquery');
+ 
+function updateDatabase(){
+       
+        global $wpdb;
+        $newStatus = $_POST['data'];
+		$currentID = $_POST['currentId'];
+		$table = 'wp_enquiryinfo';
+		$result = $wpdb->update( $table, array( 'status' => $newStatus ), array( 'id' => $currentId ));
+			
+        if (!$result) {
+			echo "Error!";
+		} else {
+			echo "Updated successfully";	
+		};
+
+}
 	
-add_action('wp_ajax_addCustomer', 'addCustomer');
+add_action('wp_ajax_updateDatabase', 'updateDatabase');
+add_action('wp_ajax_nopriv_updateDatabase', 'updateDatabase');

@@ -258,55 +258,52 @@ function tt_render_list_page(){
         <!-- Forms are NOT created automatically, so you need to wrap the table in one to use features like bulk actions -->
         <form id="movies-filter" method="get"> 
 
-            <script type="text/javascript">
-
-            jQuery('.status').on( 'change', ajaxSubmit();
-
-            function ajaxSubmit(){
-
-                alert("got in here!");
-
-            // var newCustomerForm = $this.val();
-
-            //     jQuery.ajax({
-
-            //         type:"POST",
-
-            //         url: "/wp-admin/admin-ajax.php",
-
-            //         data: newCustomerForm,
-                    
-            //         success: function(data){
-
-            //             alert("RESULTS UPDATED!!");
-
-            //         }
-
-            //         error: function() {
-
-            //             alert("FAILED!!");
-
-            //         }
-                });
-
-                    return false;
-
-                }
-
-            </script>
-
             <!-- For plugins, we also need to ensure that the form posts back to our current page -->
             <input type="hidden" name="page" value="<?php echo $_REQUEST['page'] ?>" />
             <!-- Now we can render the completed list table -->
             <?php $testListTable->display() ?>
-            
+
         </form>
         
     </div>
+
+     <script>
+
+        jQuery('select.status').on('change', function() {
+            
+            alert("got in here!");
+
+            var enquiryStatusValue = jQuery(this).val();
+
+            jQuery.ajax({
+
+                type: "POST",
+
+                url: "/wp-admin/admin-ajax.php",
+
+                data: enquiryStatusValue,
+
+                success: function() {
+
+                    alert("SUCCESSFUL!");
+
+                },
+
+                error: function() {
+
+                    alert("FAILED!!");
+
+                }
+                
+            });
+
+        })
+
+    </script>
+
 	<?php
 	
 }
 
 	
 add_action('wp_ajax_addCustomer', 'addCustomer');
-add_action('wp_ajax_nopriv_addCustomer', 'addCustomer'); // not really needed
